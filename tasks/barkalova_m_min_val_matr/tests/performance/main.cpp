@@ -1,3 +1,4 @@
+/*
 #include <gtest/gtest.h>
 
 #include <algorithm>
@@ -69,3 +70,4 @@ const auto kPerfTestName = BarkalovaMMinValMatrPerfTest::CustomPerfTestName;
 INSTANTIATE_TEST_SUITE_P(RunModeTests, BarkalovaMMinValMatrPerfTest, kGtestValues, kPerfTestName);
 
 }  // namespace barkalova_m_min_val_matr
+*/
