@@ -1,6 +1,5 @@
 #pragma once
 
-// #include <string>
 #include <tuple>
 #include <vector>
 
@@ -8,13 +7,13 @@
 
 namespace barkalova_m_star {
 struct StarMessage {
-  // int center;   // Центральный узел
   int source;  // Узел-отправитель (может быть не только центр!)
   int dest;    // Узел-получатель
   std::vector<int> data;
 };
 
 using InType = StarMessage;
+// using InType = std::tuple<int, int, std::vector<int>>;
 using OutType = std::vector<int>;
 using TestType = std::tuple<StarMessage, std::vector<int>>;
 using BaseTask = ppc::task::Task<InType, OutType>;

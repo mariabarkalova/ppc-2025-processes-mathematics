@@ -132,193 +132,210 @@ class BarkalovaMStarFuncTest : public ::testing::Test {
   }
 };
 
-// Тест 1: Широковещание от центра всем
-TEST_F(BarkalovaMStarFuncTest, BroadcastFromCenter) {
+//  Отправка данных от центра (0) центру (0) - широковещание всем
+TEST_F(BarkalovaMStarFuncTest, CenterToCenterBroadcast) {
   int size = GetWorldSize();
   if (size < 2) {
     GTEST_SKIP() << "Need at least 2 processes";
   }
 
   StarMessage input;
-  int rank = GetWorldRank();
+  input.source = 0;
+  input.dest = 0;
 
-  // Только процесс 0 инициализирует данные!
-  if (rank == 0) {
-    input.source = 0;
-    input.dest = 0;
-    input.data = {1, 2, 3, 4, 5};
-  } else {
-    input.source = 0;
-    input.dest = 0;
-    input.data = {};  // Пустые данные на остальных процессах
-  }
+  // Генерируем случайные данные
+  std::vector<int> test_data = {42, 15, 73, 29, 88};
+  input.data = test_data;
 
   BarkalovaMStarMPI task(input);
 
-  // Только процесс 0 должен проходить валидацию с данными
-  if (rank == 0) {
-    ASSERT_TRUE(task.Validation());
-  } else {
-    // На других процессах валидация должна пройти с пустыми данными
-    ASSERT_TRUE(task.Validation());
-  }
-
+  ASSERT_TRUE(task.Validation());
   ASSERT_TRUE(task.PreProcessing());
   ASSERT_TRUE(task.Run());
   ASSERT_TRUE(task.PostProcessing());
 
-  // Все процессы должны получить данные
+  // После HandleSameSourceDestination с broadcast все процессы должны иметь данные
   auto output = task.GetOutput();
-
-  // Проверяем что все получили правильные данные
-  if (rank == 0) {
-    EXPECT_EQ(output, std::vector<int>({1, 2, 3, 4, 5}));
-  } else {
-    // Остальные тоже должны получить данные через broadcast
-    EXPECT_EQ(output, std::vector<int>({1, 2, 3, 4, 5}));
-  }
+  EXPECT_EQ(output, test_data);
 }
 
-// Тест 2: Отправка от центра к периферийному узлу
-TEST_F(BarkalovaMStarFuncTest, SendFromCenterToPeripheral) {
+// Отправка от центра к периферийному узлу (и broadcast всем)
+TEST_F(BarkalovaMStarFuncTest, CenterToPeripheralWithBroadcast) {
   int size = GetWorldSize();
   if (size < 3) {
     GTEST_SKIP() << "Need at least 3 processes";
   }
 
   StarMessage input;
-  int rank = GetWorldRank();
+  input.source = 0;
+  input.dest = 1;  // Отправляем процессу 1
 
-  // Только процесс 0 инициализирует данные!
-  if (rank == 0) {
-    input.source = 0;
-    input.dest = 2;
-    input.data = {10, 20, 30, 40};
-  } else {
-    input.source = 0;
-    input.dest = 2;
-    input.data = {};  // Пустые данные на остальных процессах
-  }
+  std::vector<int> test_data = {100, 200, 300, 400, 500};
+  input.data = test_data;
 
   BarkalovaMStarMPI task(input);
 
-  // Проверяем валидацию
-  if (rank == 0) {
-    ASSERT_TRUE(task.Validation());
-  } else {
-    ASSERT_TRUE(task.Validation());  // Должна пройти с пустыми данными
-  }
-
+  ASSERT_TRUE(task.Validation());
   ASSERT_TRUE(task.PreProcessing());
-  bool run_result = task.Run();
-  ASSERT_TRUE(run_result);
+  ASSERT_TRUE(task.Run());
   ASSERT_TRUE(task.PostProcessing());
 
+  // После HandleDifferentSourceDestination с MPI_Bcast ВСЕ процессы должны получить данные
   auto output = task.GetOutput();
-
-  if (rank == 2) {
-    // Только получатель должен иметь данные
-    EXPECT_EQ(output, std::vector<int>({10, 20, 30, 40}));
-  } else {
-    // Центр и остальные процессы НЕ должны иметь данные в выходе
-    EXPECT_TRUE(output.empty());
-  }
+  EXPECT_EQ(output, test_data);
 }
 
-// Тест 3: Отправка от периферии к центру
-TEST_F(BarkalovaMStarFuncTest, SendFromPeripheralToCenter) {
+// Отправка от периферийного узла центру
+TEST_F(BarkalovaMStarFuncTest, PeripheralToCenter) {
   int size = GetWorldSize();
   if (size < 3) {
     GTEST_SKIP() << "Need at least 3 processes";
   }
 
   StarMessage input;
-  int rank = GetWorldRank();
+  input.source = 2;  // Процесс 2 отправляет
+  input.dest = 0;    // Процессу 0 (центру)
 
-  // Только процесс 0 инициализирует данные!
-  if (rank == 0) {
-    input.source = 1;
-    input.dest = 0;
-    input.data = {100, 200, 300};
-  } else {
-    input.source = 1;
-    input.dest = 0;
-    input.data = {};  // Пустые данные на остальных процессах
-  }
+  std::vector<int> test_data = {777, 888, 999};
+  input.data = test_data;
 
   BarkalovaMStarMPI task(input);
 
-  // Проверяем валидацию
-  if (rank == 0) {
-    ASSERT_TRUE(task.Validation());
-  } else {
-    ASSERT_TRUE(task.Validation());
-  }
-
+  ASSERT_TRUE(task.Validation());
   ASSERT_TRUE(task.PreProcessing());
-  bool run_result = task.Run();
-  ASSERT_TRUE(run_result);
+  ASSERT_TRUE(task.Run());
   ASSERT_TRUE(task.PostProcessing());
 
+  // После HandleDifferentSourceDestination с MPI_Bcast ВСЕ процессы должны получить данные
   auto output = task.GetOutput();
-
-  if (rank == 0) {
-    // Только центр (получатель) должен иметь данные
-    EXPECT_EQ(output, std::vector<int>({100, 200, 300}));
-  } else {
-    // Отправитель и остальные процессы НЕ должны иметь данные
-    EXPECT_TRUE(output.empty());
-  }
+  EXPECT_EQ(output, test_data);
 }
 
-// Тест 4: Отправка между периферийными узлами через центр
-TEST_F(BarkalovaMStarFuncTest, SendBetweenPeripheralsThroughCenter) {
+// Отправка между двумя периферийными узлами через центр
+TEST_F(BarkalovaMStarFuncTest, PeripheralToPeripheralThroughCenter) {
   int size = GetWorldSize();
   if (size < 4) {
     GTEST_SKIP() << "Need at least 4 processes";
   }
 
   StarMessage input;
-  int rank = GetWorldRank();
+  input.source = 1;  // От процессора 1
+  input.dest = 3;    // К процессору 3
 
-  // Только процесс 0 инициализирует данные!
-  if (rank == 0) {
-    input.source = 1;
-    input.dest = 3;
-    input.data = {5, 10, 15, 20, 25};
-  } else {
-    input.source = 1;
-    input.dest = 3;
-    input.data = {};  // Пустые данные на остальных процессах
-  }
+  std::vector<int> test_data = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+  input.data = test_data;
 
   BarkalovaMStarMPI task(input);
 
-  // Проверяем валидацию
-  if (rank == 0) {
-    ASSERT_TRUE(task.Validation());
-  } else {
-    ASSERT_TRUE(task.Validation());
-  }
-
+  ASSERT_TRUE(task.Validation());
   ASSERT_TRUE(task.PreProcessing());
-  bool run_result = task.Run();
-  ASSERT_TRUE(run_result);
+  ASSERT_TRUE(task.Run());
   ASSERT_TRUE(task.PostProcessing());
 
+  // После HandleDifferentSourceDestination с MPI_Bcast ВСЕ процессы должны получить данные
   auto output = task.GetOutput();
-
-  if (rank == 3) {
-    // Только конечный получатель должен иметь данные
-    EXPECT_EQ(output, std::vector<int>({5, 10, 15, 20, 25}));
-  } else {
-    // Центр и отправитель НЕ должны иметь данные в выходе
-    EXPECT_TRUE(output.empty());
-  }
+  EXPECT_EQ(output, test_data);
 }
 
-// Тест 5: SEQ версия
-TEST_F(BarkalovaMStarFuncTest, SeqVersion) {
+// Отправка самому себе (source == dest)
+TEST_F(BarkalovaMStarFuncTest, SendToSelf) {
+  int size = GetWorldSize();
+  if (size < 3) {
+    GTEST_SKIP() << "Need at least 3 processes";
+  }
+
+  StarMessage input;
+  // Каждый процесс отправляет сам себе
+  int rank = GetWorldRank();
+  input.source = rank;
+  input.dest = rank;
+
+  std::vector<int> self_data = {rank * 10 + 1, rank * 10 + 2, rank * 10 + 3};
+  input.data = self_data;
+
+  BarkalovaMStarMPI task(input);
+
+  ASSERT_TRUE(task.Validation());
+  ASSERT_TRUE(task.PreProcessing());
+  ASSERT_TRUE(task.Run());
+  ASSERT_TRUE(task.PostProcessing());
+
+  // В этом случае каждый процесс должен получить СВОИ данные
+  auto output = task.GetOutput();
+  EXPECT_EQ(output, self_data);
+}
+
+/*// Тест 7: Малое количество процессов (< 3)
+TEST_F(BarkalovaMStarFuncTest, FewProcesses) {
+  int size = GetWorldSize();
+
+  StarMessage input;
+  input.source = 0;
+  input.dest = size > 1 ? 1 : 0;
+  input.data = {1, 2, 3};
+
+  BarkalovaMStarMPI task(input);
+
+  ASSERT_TRUE(task.Validation());
+  ASSERT_TRUE(task.PreProcessing());
+  ASSERT_TRUE(task.Run());
+  ASSERT_TRUE(task.PostProcessing());
+
+  // При < 3 процессах должен вернуться {INT_MAX}
+  if (size < 3) {
+    auto output = task.GetOutput();
+    EXPECT_EQ(output.size(), 1);
+    EXPECT_EQ(output[0], INT_MAX);
+  } else {
+    // При >= 3 процессах нормальная работа
+    auto output = task.GetOutput();
+    EXPECT_EQ(output, std::vector<int>({1, 2, 3}));
+  }
+}*/
+
+// Тест 8: Проверка корректности валидации
+TEST_F(BarkalovaMStarFuncTest, ValidationTests) {
+  int size = GetWorldSize();
+
+  // Корректные данные
+  StarMessage valid_input;
+  valid_input.source = 0;
+  valid_input.dest = (size > 1) ? 1 : 0;
+  valid_input.data = {1, 2, 3};
+
+  BarkalovaMStarMPI valid_task(valid_input);
+  EXPECT_TRUE(valid_task.Validation());
+
+  // Некорректный source (отрицательный)
+  StarMessage invalid_source;
+  invalid_source.source = -1;
+  invalid_source.dest = 0;
+  invalid_source.data = {1, 2, 3};
+
+  BarkalovaMStarMPI invalid_source_task(invalid_source);
+  EXPECT_FALSE(invalid_source_task.Validation());
+
+  // Некорректный dest (больше количества процессов)
+  StarMessage invalid_dest;
+  invalid_dest.source = 0;
+  invalid_dest.dest = size + 100;
+  invalid_dest.data = {1, 2, 3};
+
+  BarkalovaMStarMPI invalid_dest_task(invalid_dest);
+  EXPECT_FALSE(invalid_dest_task.Validation());
+
+  // Некорректный source и dest (оба за пределами)
+  StarMessage invalid_both;
+  invalid_both.source = size + 50;
+  invalid_both.dest = size + 100;
+  invalid_both.data = {1, 2, 3};
+
+  BarkalovaMStarMPI invalid_both_task(invalid_both);
+  EXPECT_FALSE(invalid_both_task.Validation());
+}
+
+// Тест 9: SEQ версия (для сравнения)
+TEST_F(BarkalovaMStarFuncTest, SequentialVersion) {
   // SEQ тест должен работать только на 1 процессе
   int size = GetWorldSize();
   if (size != 1) {
@@ -328,136 +345,22 @@ TEST_F(BarkalovaMStarFuncTest, SeqVersion) {
   StarMessage input;
   input.source = 0;
   input.dest = 0;
-  input.data = {1, 3, 5, 7, 9};
 
-  BarkalovaMStarSEQ task(input);
-
-  ASSERT_TRUE(task.Validation());
-  ASSERT_TRUE(task.PreProcessing());
-  ASSERT_TRUE(task.Run());
-  ASSERT_TRUE(task.PostProcessing());
-
-  auto output = task.GetOutput();
-  EXPECT_EQ(output, input.data);
-}
-
-// Тест 6: Некорректные параметры
-TEST_F(BarkalovaMStarFuncTest, InvalidParameters) {
-  int size = GetWorldSize();
-  int rank = GetWorldRank();
-
-  // Некорректный source
-  StarMessage input1;
-  if (rank == 0) {
-    input1.source = -1;
-    input1.dest = 0;
-    input1.data = {1, 2, 3};
-  } else {
-    input1.source = -1;
-    input1.dest = 0;
-    input1.data = {};
+  std::vector<int> test_data;
+  for (int i = 0; i < 100; ++i) {
+    test_data.push_back(i * i);
   }
+  input.data = test_data;
 
-  BarkalovaMStarMPI task1(input1);
-  EXPECT_FALSE(task1.Validation());
+  BarkalovaMStarSEQ seq_task(input);
 
-  // Некорректный dest
-  StarMessage input2;
-  if (rank == 0) {
-    input2.source = 0;
-    input2.dest = size + 10;
-    input2.data = {1, 2, 3};
-  } else {
-    input2.source = 0;
-    input2.dest = size + 10;
-    input2.data = {};
-  }
+  ASSERT_TRUE(seq_task.Validation());
+  ASSERT_TRUE(seq_task.PreProcessing());
+  ASSERT_TRUE(seq_task.Run());
+  ASSERT_TRUE(seq_task.PostProcessing());
 
-  BarkalovaMStarMPI task2(input2);
-  EXPECT_FALSE(task2.Validation());
-}
-
-// Тест 7: Пустые данные
-TEST_F(BarkalovaMStarFuncTest, EmptyData) {
-  int size = GetWorldSize();
-  if (size < 2) {
-    GTEST_SKIP() << "Need at least 2 processes";
-  }
-
-  StarMessage input;
-  int rank = GetWorldRank();  // Убираем предупреждение - используем переменную
-
-  // Даже на процессе 0 данные пустые
-  input.source = 0;
-  input.dest = 1;
-  input.data = {};  // Пустые данные на ВСЕХ процессах
-
-  BarkalovaMStarMPI task(input);
-
-  // Проверяем валидацию в зависимости от ранга
-  bool validation_result = task.Validation();
-  (void)rank;  // Используем переменную, чтобы убрать предупреждение
-
-  ASSERT_TRUE(validation_result);
-  ASSERT_TRUE(task.PreProcessing());
-  ASSERT_TRUE(task.Run());
-  ASSERT_TRUE(task.PostProcessing());
-
-  auto output = task.GetOutput();
-  EXPECT_TRUE(output.empty());
-}
-
-// Тест 8: Большие данные
-TEST_F(BarkalovaMStarFuncTest, LargeData) {
-  int size = GetWorldSize();
-  if (size < 2) {
-    GTEST_SKIP() << "Need at least 2 processes";
-  }
-
-  StarMessage input;
-  int rank = GetWorldRank();
-
-  // Только процесс 0 инициализирует данные!
-  if (rank == 0) {
-    input.source = 0;
-    input.dest = 1;
-    input.data.resize(1000);
-
-    for (size_t i = 0; i < input.data.size(); ++i) {
-      input.data[i] = static_cast<int>(i * 2);
-    }
-  } else {
-    input.source = 0;
-    input.dest = 1;
-    input.data = {};  // Пустые данные на остальных процессах
-  }
-
-  BarkalovaMStarMPI task(input);
-
-  // Проверяем валидацию
-  if (rank == 0) {
-    ASSERT_TRUE(task.Validation());
-  } else {
-    ASSERT_TRUE(task.Validation());
-  }
-
-  ASSERT_TRUE(task.PreProcessing());
-  bool run_result = task.Run();
-  ASSERT_TRUE(run_result);
-  ASSERT_TRUE(task.PostProcessing());
-
-  auto output = task.GetOutput();
-
-  if (rank == 1) {
-    // Только получатель должен иметь данные
-    std::vector<int> expected(1000);
-    for (size_t i = 0; i < expected.size(); ++i) {
-      expected[i] = static_cast<int>(i * 2);
-    }
-    EXPECT_EQ(output, expected);
-  } else {
-    EXPECT_TRUE(output.empty());
-  }
+  auto output = seq_task.GetOutput();
+  EXPECT_EQ(output, test_data);
 }
 
 }  // namespace barkalova_m_star

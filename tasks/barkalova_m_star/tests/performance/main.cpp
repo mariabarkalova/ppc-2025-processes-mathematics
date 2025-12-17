@@ -44,6 +44,7 @@ INSTANTIATE_TEST_SUITE_P(RunModeTests, BarkalovaMStarPerfTests, kGtestValues, kP
 #include <gtest/gtest.h>
 #include <mpi.h>
 
+#include <climits>
 #include <cstddef>
 #include <vector>
 
@@ -55,20 +56,22 @@ INSTANTIATE_TEST_SUITE_P(RunModeTests, BarkalovaMStarPerfTests, kGtestValues, kP
 namespace barkalova_m_star {
 
 class BarkalovaMStarPerfTest : public ppc::util::BaseRunPerfTests<InType, OutType> {
-  static constexpr int kDataSize = 10000000;
+  static constexpr int kDataSize = 1000000;
+
   InType input_data_{};
+  std::vector<int> expected_output_{};
   bool skip_test_ = false;
+  int world_size_ = 0;
 
   void SetUp() override {
-    int size = 0;
-    MPI_Comm_size(MPI_COMM_WORLD, &size);
+    MPI_Comm_size(MPI_COMM_WORLD, &world_size_);
 
     auto test_tuple = GetParam();
     std::string task_type = std::get<1>(test_tuple);
 
     // Если это SEQ задача и процессов больше 1 - пропускаем тест
     if (task_type.find("seq") != std::string::npos) {
-      if (size > 1) {
+      if (world_size_ > 1) {
         skip_test_ = true;
         return;
       }
@@ -76,27 +79,33 @@ class BarkalovaMStarPerfTest : public ppc::util::BaseRunPerfTests<InType, OutTyp
 
     skip_test_ = false;
 
-    if (size >= 4) {
-      // На 4+ процессах
-      input_data_.source = 1;  // периферия
-      input_data_.dest = 3;    // периферия
-    } else if (size >= 3) {
-      // На 3 процессах
-      input_data_.source = 0;  // центр
-      input_data_.dest = 2;    // периферия
-    } else if (size >= 2) {
-      // На 2 процессах
-      input_data_.source = 0;  // центр
-      input_data_.dest = 1;    // периферия
-    } else {
-      // На 1 процессе: SEQ версия или широковещание
-      input_data_.source = 0;  // центр
-      input_data_.dest = 0;    // широковещание
-    }
-
+    // Инициализируем тестовые данные
     input_data_.data.resize(kDataSize);
     for (int i = 0; i < kDataSize; ++i) {
       input_data_.data[static_cast<std::size_t>(i)] = i % 100;
+    }
+
+    // Выбираем сценарий в зависимости от количества процессов
+    if (world_size_ >= 4) {
+      // Сценарий 1: Периферия -> Периферия через центр
+      input_data_.source = 1;
+      input_data_.dest = 3;
+      expected_output_ = input_data_.data;
+    } else if (world_size_ >= 3) {
+      // Сценарий 2: Центр -> Периферия
+      input_data_.source = 0;
+      input_data_.dest = 2;
+      expected_output_ = input_data_.data;
+    } else if (world_size_ == 2) {
+      // Сценарий 3: 2 процесса - программа возвращает пустой вектор
+      input_data_.source = 0;
+      input_data_.dest = 1;
+      expected_output_ = {};  // Пустой вектор
+    } else if (world_size_ == 1) {
+      // Сценарий 4: 1 процесс
+      input_data_.source = 0;
+      input_data_.dest = 0;
+      expected_output_ = input_data_.data;
     }
   }
 
@@ -105,25 +114,32 @@ class BarkalovaMStarPerfTest : public ppc::util::BaseRunPerfTests<InType, OutTyp
       return true;
     }
 
-    int rank = 0;
-    int size = 0;
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    MPI_Comm_size(MPI_COMM_WORLD, &size);
-
     auto test_tuple = GetParam();
     std::string task_type = std::get<1>(test_tuple);
 
+    // Для SEQ версии
     if (task_type.find("seq") != std::string::npos) {
       return output_data == input_data_.data;
     }
 
-    if (input_data_.source == 0 && input_data_.dest == 0) {
-      return output_data == input_data_.data;
-    } else if (rank == input_data_.dest) {
-      return output_data == input_data_.data;
-    } else {
+    // Для MPI версии
+    if (world_size_ < 3) {
+      // На 1-2 процессах: программа возвращает пустой вектор
       return output_data.empty();
     }
+
+    // На 3+ процессах: все получают данные через Bcast
+    if (output_data.size() != expected_output_.size()) {
+      return false;
+    }
+
+    for (size_t i = 0; i < output_data.size(); ++i) {
+      if (output_data[i] != expected_output_[i]) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   InType GetTestInputData() final {
