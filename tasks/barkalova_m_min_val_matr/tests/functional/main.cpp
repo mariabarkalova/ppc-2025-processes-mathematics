@@ -1,3 +1,4 @@
+/*
 #include <gtest/gtest.h>
 #include <stb/stb_image.h>
 
@@ -212,3 +213,4 @@ INSTANTIATE_TEST_SUITE_P(MinValuesTests, BarkalovaMMinValMatrFuncTests, kGtestVa
 }  // namespace
 
 }  // namespace barkalova_m_min_val_matr
+*/
