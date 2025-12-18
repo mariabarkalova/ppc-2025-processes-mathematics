@@ -13,7 +13,7 @@
 #include "barkalova_m_min_val_matr/seq/include/ops_seq.hpp"
 #include "util/include/func_test_util.hpp"
 #include "util/include/util.hpp"
-
+/*
 namespace barkalova_m_min_val_matr {
 
 class BarkalovaMMinValMatrFuncTests : public ppc::util::BaseRunFuncTests<InType, OutType, TestType> {
@@ -212,8 +212,8 @@ INSTANTIATE_TEST_SUITE_P(MinValuesTests, BarkalovaMMinValMatrFuncTests, kGtestVa
 }  // namespace
 
 }  // namespace barkalova_m_min_val_matr
+*/
 
-/*
 namespace barkalova_m_min_val_matr {
 
 class BarkalovaMMinValMatrFuncTests : public ppc::util::BaseRunFuncTests<InType, OutType, TestType> {
@@ -294,4 +294,3 @@ INSTANTIATE_TEST_SUITE_P(MinValuesTests, BarkalovaMMinValMatrFuncTests, kGtestVa
 }  // namespace
 
 }  // namespace barkalova_m_min_val_matr
-*/

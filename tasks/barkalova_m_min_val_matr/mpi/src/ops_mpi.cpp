@@ -1,3 +1,4 @@
+/*
 #include "barkalova_m_min_val_matr/mpi/include/ops_mpi.hpp"
 
 #include <mpi.h>
@@ -274,8 +275,8 @@ bool BarkalovaMMinValMatrMPI::PostProcessingImpl() {
   return true;
 }
 }  // namespace barkalova_m_min_val_matr
+*/
 
-/*
 #include "barkalova_m_min_val_matr/mpi/include/ops_mpi.hpp"
 
 #include <mpi.h>
@@ -440,5 +441,3 @@ bool BarkalovaMMinValMatrMPI::PostProcessingImpl() {
 }
 
 }  // namespace barkalova_m_min_val_matr
-
-*/
