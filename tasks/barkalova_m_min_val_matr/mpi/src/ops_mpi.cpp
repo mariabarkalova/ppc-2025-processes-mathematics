@@ -282,11 +282,8 @@ bool BarkalovaMMinValMatrMPI::PostProcessingImpl() {
 #include <mpi.h>
 
 #include <algorithm>
-#include <array>
 #include <climits>
 #include <cstddef>
-#include <cstdint>
-#include <utility>
 #include <vector>
 
 #include "barkalova_m_min_val_matr/common/include/common.hpp"

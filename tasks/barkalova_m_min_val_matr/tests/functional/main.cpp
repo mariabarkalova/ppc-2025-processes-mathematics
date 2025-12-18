@@ -1,4 +1,4 @@
-#include <gtest/gtest.h>
+/*#include <gtest/gtest.h>
 #include <stb/stb_image.h>
 
 #include <array>
@@ -13,7 +13,7 @@
 #include "barkalova_m_min_val_matr/seq/include/ops_seq.hpp"
 #include "util/include/func_test_util.hpp"
 #include "util/include/util.hpp"
-/*
+
 namespace barkalova_m_min_val_matr {
 
 class BarkalovaMMinValMatrFuncTests : public ppc::util::BaseRunFuncTests<InType, OutType, TestType> {
@@ -213,6 +213,21 @@ INSTANTIATE_TEST_SUITE_P(MinValuesTests, BarkalovaMMinValMatrFuncTests, kGtestVa
 
 }  // namespace barkalova_m_min_val_matr
 */
+#include <gtest/gtest.h>
+#include <stb/stb_image.h>
+
+#include <array>
+#include <climits>
+#include <cstddef>
+#include <string>
+#include <tuple>
+#include <vector>
+
+#include "barkalova_m_min_val_matr/common/include/common.hpp"
+#include "barkalova_m_min_val_matr/mpi/include/ops_mpi.hpp"
+#include "barkalova_m_min_val_matr/seq/include/ops_seq.hpp"
+#include "util/include/func_test_util.hpp"
+#include "util/include/util.hpp"
 
 namespace barkalova_m_min_val_matr {
 
