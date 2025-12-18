@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "barkalova_m_min_val_matr/common/include/common.hpp"
-/*
+
 namespace barkalova_m_min_val_matr {
 
 BarkalovaMMinValMatrSEQ::BarkalovaMMinValMatrSEQ(const InType &in) {
@@ -59,8 +59,8 @@ bool BarkalovaMMinValMatrSEQ::PostProcessingImpl() {
   return GetInput().empty() || !GetOutput().empty();
 }
 }  // namespace barkalova_m_min_val_matr
-*/
 
+/*
 namespace barkalova_m_min_val_matr {
 
 BarkalovaMMinValMatrSEQ::BarkalovaMMinValMatrSEQ(const InType &in) {
@@ -113,3 +113,4 @@ bool BarkalovaMMinValMatrSEQ::PostProcessingImpl() {
 }
 
 }  // namespace barkalova_m_min_val_matr
+*/
