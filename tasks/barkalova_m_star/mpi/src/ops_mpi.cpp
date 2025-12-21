@@ -1,78 +1,3 @@
-/*
-#include "barkalova_m_star/mpi/include/ops_mpi.hpp"
-
-#include <mpi.h>
-
-#include <numeric>
-#include <vector>
-
-#include "barkalova_m_star/common/include/common.hpp"
-#include "util/include/util.hpp"
-
-namespace barkalova_m_star {
-
-BarkalovaMStarMPI::BarkalovaMStarMPI(const InType &in) {
-  SetTypeOfTask(GetStaticTypeOfTask());
-  GetInput() = in;
-  GetOutput() = 0;
-}
-
-bool BarkalovaMStarMPI::ValidationImpl() {
-  return (GetInput() > 0) && (GetOutput() == 0);
-}
-
-bool BarkalovaMStarMPI::PreProcessingImpl() {
-  GetOutput() = 2 * GetInput();
-  return GetOutput() > 0;
-}
-
-bool BarkalovaMStarMPI::RunImpl() {
-  auto input = GetInput();
-  if (input == 0) {
-    return false;
-  }
-
-  for (InType i = 0; i < GetInput(); i++) {
-    for (InType j = 0; j < GetInput(); j++) {
-      for (InType k = 0; k < GetInput(); k++) {
-        std::vector<InType> tmp(i + j + k, 1);
-        GetOutput() += std::accumulate(tmp.begin(), tmp.end(), 0);
-        GetOutput() -= i + j + k;
-      }
-    }
-  }
-
-  const int num_threads = ppc::util::GetNumThreads();
-  GetOutput() *= num_threads;
-
-  int rank = 0;
-  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-
-  if (rank == 0) {
-    GetOutput() /= num_threads;
-  } else {
-    int counter = 0;
-    for (int i = 0; i < num_threads; i++) {
-      counter++;
-    }
-
-    if (counter != 0) {
-      GetOutput() /= counter;
-    }
-  }
-
-  MPI_Barrier(MPI_COMM_WORLD);
-  return GetOutput() > 0;
-}
-
-bool BarkalovaMStarMPI::PostProcessingImpl() {
-  GetOutput() -= GetInput();
-  return GetOutput() > 0;
-}
-
-}  // namespace barkalova_m_star
-*/
-
 #include "barkalova_m_star/mpi/include/ops_mpi.hpp"
 
 #include <mpi.h>
@@ -114,13 +39,10 @@ bool BarkalovaMStarMPI::PreProcessingImpl() {
 
 namespace {
 
-void HandleSameSourceDestination(int rank, int source, size_t data_size, const std::vector<int> &source_data,
-                                 std::vector<int> &output) {
+void ToMyself(int rank, int source, const std::vector<int> &source_data, std::vector<int> &output) {
   if (rank == source) {
     output = source_data;
   }
-  output.resize(data_size);
-  MPI_Bcast(output.data(), static_cast<int>(data_size), MPI_INT, source, MPI_COMM_WORLD);
 }
 
 void ProcSource(int source, size_t data_size, const std::vector<int> &source_data) {
@@ -130,18 +52,15 @@ void ProcSource(int source, size_t data_size, const std::vector<int> &source_dat
 }
 
 void ProcDest(int dest, size_t data_size, std::vector<int> &output) {
+  std::vector<int> buff(data_size);
   if (dest != 0) {
-    std::vector<int> buff(data_size);
     MPI_Status status;
     MPI_Recv(buff.data(), static_cast<int>(data_size), MPI_INT, 0, 0, MPI_COMM_WORLD, &status);
-    output = std::move(buff);
   }
-  // output = buff;
-  //  Если dest == 0, данные уже должны быть в output после ProcessZeroRouting
+  output = std::move(buff);
 }
 
-void ProcessZeroRouting(int source, int dest, size_t data_size, const std::vector<int> &source_data,
-                        std::vector<int> &output) {
+void Center(int source, int dest, size_t data_size, const std::vector<int> &source_data, std::vector<int> &output) {
   if (source != 0) {
     std::vector<int> buff(data_size);
     MPI_Status status;
@@ -149,7 +68,6 @@ void ProcessZeroRouting(int source, int dest, size_t data_size, const std::vecto
     if (dest != 0) {
       MPI_Send(buff.data(), static_cast<int>(data_size), MPI_INT, dest, 0, MPI_COMM_WORLD);
     } else {
-      // output = buff;
       output = std::move(buff);
     }
   } else {
@@ -157,20 +75,20 @@ void ProcessZeroRouting(int source, int dest, size_t data_size, const std::vecto
   }
 }
 
-void HandleDifferentSourceDestination(int rank, int source, int dest, size_t data_size,
-                                      const std::vector<int> &source_data, std::vector<int> &output) {
-  output.resize(data_size);
+void ToAnother(int rank, int source, int dest, size_t data_size, const std::vector<int> &source_data,
+               std::vector<int> &output) {
+  if (rank == dest || (rank == 0 && dest == 0)) {
+    output.resize(data_size);
+  }
+
   if (rank == 0) {
-    ProcessZeroRouting(source, dest, data_size, source_data, output);
+    Center(source, dest, data_size, source_data, output);
   } else if (rank == source) {
     ProcSource(source, data_size, source_data);
   } else if (rank == dest) {
     ProcDest(dest, data_size, output);
   }
-  // для чего?
-  MPI_Bcast(output.data(), static_cast<int>(data_size), MPI_INT, dest, MPI_COMM_WORLD);
 }
-
 }  // namespace
 
 bool BarkalovaMStarMPI::RunImpl() {
@@ -183,21 +101,25 @@ bool BarkalovaMStarMPI::RunImpl() {
   int source = input.source;
   int dest = input.dest;
 
-  // подумать
-  if (size < 3) {
-    GetOutput() = {};
-    // return false;  // Или true, если хотите просто пропустить
+  if (size == 1) {
+    GetOutput() = GetInput().data;
     return true;
   } else {
     const std::vector<int> &data = input.data;
     size_t data_size = data.size();
-    // auto data_size = static_cast<uint64_t>(data.size());
-    GetOutput().resize(data_size);
+
+    if (rank == source && source == dest) {
+      GetOutput().resize(data_size);
+    } else if (rank == dest || (rank == 0 && dest == 0)) {
+      GetOutput().resize(data_size);
+    } else {
+      GetOutput() = {};
+    }
 
     if (source == dest) {
-      HandleSameSourceDestination(rank, source, data_size, input.data, GetOutput());
+      ToMyself(rank, source, input.data, GetOutput());
     } else {
-      HandleDifferentSourceDestination(rank, source, dest, data_size, input.data, GetOutput());
+      ToAnother(rank, source, dest, data_size, input.data, GetOutput());
     }
   }
   return true;
