@@ -3,6 +3,7 @@
 
 #include <climits>
 #include <cstddef>
+#include <string>
 #include <vector>
 
 #include "barkalova_m_star/common/include/common.hpp"
@@ -16,7 +17,7 @@ class BarkalovaMStarPerfTest : public ppc::util::BaseRunPerfTests<InType, OutTyp
   static constexpr int kDataSize = 1000000;
 
   InType input_data_{};
-  std::vector<int> expected_output_{};
+  std::vector<int> expected_output_;
   bool skip_test_ = false;
   int world_size_ = 0;
   int world_rank_ = 0;

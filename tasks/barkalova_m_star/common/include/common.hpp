@@ -7,8 +7,8 @@
 
 namespace barkalova_m_star {
 struct StarMessage {
-  int source;  // Узел-отправитель
-  int dest;    // Узел-получатель
+  int source{};  // Узел-отправитель
+  int dest{};    // Узел-получатель
   std::vector<int> data;
 };
 

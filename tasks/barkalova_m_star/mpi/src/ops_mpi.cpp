@@ -2,11 +2,8 @@
 
 #include <mpi.h>
 
-#include <algorithm>
-#include <chrono>  //посмореть
-#include <climits>
-#include <cstdint>
-#include <thread>
+#include <cstddef>  // для size_t
+#include <utility>  // для std::move
 #include <vector>
 
 #include "barkalova_m_star/common/include/common.hpp"
