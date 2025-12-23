@@ -1,16 +1,16 @@
 #pragma once
 
-#include "barkalova_m_star/common/include/common.hpp"
+#include "barkalova_m_int_met_trapez/common/include/common.hpp"
 #include "task/include/task.hpp"
 
-namespace barkalova_m_star {
+namespace barkalova_m_int_met_trapez {
 
-class BarkalovaMStarMPI : public BaseTask {
+class BarkalovaMIntMetTrapezMPI : public BaseTask {
  public:
   static constexpr ppc::task::TypeOfTask GetStaticTypeOfTask() {
     return ppc::task::TypeOfTask::kMPI;
   }
-  explicit BarkalovaMStarMPI(const InType &in);
+  explicit BarkalovaMIntMetTrapezMPI(const InType &in);
 
  private:
   bool ValidationImpl() override;
@@ -19,4 +19,4 @@ class BarkalovaMStarMPI : public BaseTask {
   bool PostProcessingImpl() override;
 };
 
-}  // namespace barkalova_m_star
+}  // namespace barkalova_m_int_met_trapez
