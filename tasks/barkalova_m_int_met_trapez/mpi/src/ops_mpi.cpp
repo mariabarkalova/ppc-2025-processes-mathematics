@@ -16,7 +16,9 @@ BarkalovaMIntMetTrapezMPI::BarkalovaMIntMetTrapezMPI(const InType &in) {
 }
 
 bool BarkalovaMIntMetTrapezMPI::ValidationImpl() {
-  return true;
+  auto &data = GetInput();
+  // Проверяем, что векторы имеют достаточно элементов
+  return data.limits.size() >= 2 && data.n_i.size() >= 2;
 }
 
 bool BarkalovaMIntMetTrapezMPI::PreProcessingImpl() {

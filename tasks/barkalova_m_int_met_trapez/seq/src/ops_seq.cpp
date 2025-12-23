@@ -14,7 +14,9 @@ BarkalovaMIntMetTrapezSEQ::BarkalovaMIntMetTrapezSEQ(const InType &in) {
 }
 
 bool BarkalovaMIntMetTrapezSEQ::ValidationImpl() {
-  return true;
+  auto &data = GetInput();
+  // Проверяем, что векторы имеют достаточно элементов
+  return data.limits.size() >= 2 && data.n_i.size() >= 2;
 }
 
 bool BarkalovaMIntMetTrapezSEQ::PreProcessingImpl() {

@@ -41,7 +41,6 @@ INSTANTIATE_TEST_SUITE_P(RunModeTests, ExampleRunPerfTestProcesses3, kGtestValue
 }  // namespace barkalova_m_int_met_trapez
 */
 
-/*
 #include <gtest/gtest.h>
 #include <mpi.h>
 
@@ -61,8 +60,8 @@ class BarkalovaIntegralPerformanceTests : public ppc::util::BaseRunPerfTests<InT
     // Уменьшаем размер сетки для тестов производительности
     // 500x500 = 250K узлов вместо 4M (быстрее в 16 раз)
     input_data_ = Integral{
-      .limits = {{0.0, 1.0}, {0.0, 1.0}},  // Единичный квадрат
-      .n_i = {500, 500}  // Уменьшенная сетка для теста производительности
+        .limits = {{0.0, 1.0}, {0.0, 1.0}},  // Единичный квадрат
+        .n_i = {500, 500}                    // Уменьшенная сетка для теста производительности
     };
   }
 
@@ -83,10 +82,8 @@ class BarkalovaIntegralPerformanceTests : public ppc::util::BaseRunPerfTests<InT
     bool result = error < tolerance;
 
     if (!result) {
-      std::cout << "Performance test check failed: expected " << expected
-                << ", got " << output_data
-                << ", error " << error
-                << ", tolerance " << tolerance << std::endl;
+      std::cout << "Performance test check failed: expected " << expected << ", got " << output_data << ", error "
+                << error << ", tolerance " << tolerance << std::endl;
     }
 
     return result;
@@ -105,17 +102,12 @@ TEST_P(BarkalovaIntegralPerformanceTests, PerformanceTests) {
 }
 
 // Создаем задачи для тестирования производительности
-const auto kAllPerfTasks =
-    ppc::util::MakeAllPerfTasks<InType, BarkalovaMIntMetTrapezMPI, BarkalovaMIntMetTrapezSEQ>(
-        PPC_SETTINGS_barkalova_m_int_met_trapez);
+const auto kAllPerfTasks = ppc::util::MakeAllPerfTasks<InType, BarkalovaMIntMetTrapezMPI, BarkalovaMIntMetTrapezSEQ>(
+    PPC_SETTINGS_barkalova_m_int_met_trapez);
 
 const auto kGtestValues = ppc::util::TupleToGTestValues(kAllPerfTasks);
 const auto kPerfTestName = BarkalovaIntegralPerformanceTests::CustomPerfTestName;
 
-INSTANTIATE_TEST_SUITE_P(BarkalovaPerformanceTestSuite,
-                        BarkalovaIntegralPerformanceTests,
-                        kGtestValues,
-                        kPerfTestName);
+INSTANTIATE_TEST_SUITE_P(BarkalovaPerformanceTestSuite, BarkalovaIntegralPerformanceTests, kGtestValues, kPerfTestName);
 
 }  // namespace barkalova_m_int_met_trapez
-*/

@@ -86,7 +86,6 @@ INSTANTIATE_TEST_SUITE_P(PicMatrixTests, NesterovARunFuncTestsProcesses3, kGtest
 }  // namespace barkalova_m_int_met_trapez
 */
 
-/*
 #include <gtest/gtest.h>
 
 #include <array>
@@ -105,10 +104,10 @@ namespace barkalova_m_int_met_trapez {
 
 // Структура для тестовых данных
 struct TestIntegralData {
-  std::vector<int> n_i;  // Число интервалов по x и y
+  std::vector<int> n_i;                           // Число интервалов по x и y
   std::vector<std::pair<double, double>> limits;  // Пределы интегрирования
-  double expected_value;  // Ожидаемое значение интеграла
-  double tolerance;       // Допустимая погрешность
+  double expected_value;                          // Ожидаемое значение интеграла
+  double tolerance;                               // Допустимая погрешность
 };
 
 using FuncTestType = std::tuple<TestIntegralData, std::string>;
@@ -141,10 +140,8 @@ class BarkalovaMIntMetTrapezRunFuncTests : public ppc::util::BaseRunFuncTests<In
 
     // Для отладки выводим информацию при ошибке
     if (error >= tolerance_) {
-      std::cout << "TEST FAILED: error = " << error
-                << ", tolerance = " << tolerance_
-                << ", expected = " << expected_value_
-                << ", got = " << output_data << std::endl;
+      std::cout << "TEST FAILED: error = " << error << ", tolerance = " << tolerance_
+                << ", expected = " << expected_value_ << ", got = " << output_data << std::endl;
     }
 
     return error < tolerance_;
@@ -172,8 +169,8 @@ double CalculateExactIntegral(double x1, double x2, double y1, double y2) {
   double x_diff = x2 - x1;
   double y_diff = y2 - y1;
 
-  double x_cubed_diff = (x2*x2*x2 - x1*x1*x1);
-  double y_cubed_diff = (y2*y2*y2 - y1*y1*y1);
+  double x_cubed_diff = (x2 * x2 * x2 - x1 * x1 * x1);
+  double y_cubed_diff = (y2 * y2 * y2 - y1 * y1 * y1);
 
   return (x_cubed_diff * y_diff + y_cubed_diff * x_diff) / 3.0;
 }
@@ -187,74 +184,55 @@ const std::array<FuncTestType, 8> kTestParam = {
     // Тест 1: Единичный квадрат [0,1]x[0,1]
     // ∫∫(x²+y²)dxdy = ∫(x²y + y³/3)|_{0}^{1} dx от 0 до 1
     // = ∫(x² + 1/3)dx от 0 до 1 = (1/3 + 1/3) = 2/3 = 0.6666667
-    std::make_tuple(
-        TestIntegralData{
-            .n_i = {100, 100},
-            .limits = {{0.0, 1.0}, {0.0, 1.0}},
-            .expected_value = 2.0/3.0,  // 0.6666667
-            .tolerance = 1e-4
-        },
-        "unit_square_100x100"
-    ),
+    std::make_tuple(TestIntegralData{.n_i = {100, 100},
+                                     .limits = {{0.0, 1.0}, {0.0, 1.0}},
+                                     .expected_value = 2.0 / 3.0,  // 0.6666667
+                                     .tolerance = 1e-4},
+                    "unit_square_100x100"),
 
     // Тест 2: Тот же квадрат с меньшей сеткой
     std::make_tuple(
         TestIntegralData{
             .n_i = {50, 50},
             .limits = {{0.0, 1.0}, {0.0, 1.0}},
-            .expected_value = 2.0/3.0,
+            .expected_value = 2.0 / 3.0,
             .tolerance = 1e-3  // Больший допуск для меньшей сетки
         },
-        "unit_square_50x50"
-    ),
+        "unit_square_50x50"),
 
     // Тест 3: Прямоугольник [0,2]x[0,3]
     // ∫∫(x²+y²)dxdy = (8*3 + 27*2)/3 = (24 + 54)/3 = 78/3 = 26
     std::make_tuple(
         TestIntegralData{
-            .n_i = {100, 100},
-            .limits = {{0.0, 2.0}, {0.0, 3.0}},
-            .expected_value = 26.0,
-            .tolerance = 1e-2
-        },
-        "rectangle_2x3_100x100"
-    ),
+            .n_i = {100, 100}, .limits = {{0.0, 2.0}, {0.0, 3.0}}, .expected_value = 26.0, .tolerance = 1e-2},
+        "rectangle_2x3_100x100"),
 
     // Тест 4: Симметричный квадрат [-1,1]x[-1,1]
     // Можно вычислить как 4 * ∫∫(x²+y²)dxdy от 0 до 1
     // = 4 * 2/3 = 8/3 = 2.6666667
-    std::make_tuple(
-        TestIntegralData{
-            .n_i = {100, 100},
-            .limits = {{-1.0, 1.0}, {-1.0, 1.0}},
-            .expected_value = 8.0/3.0,  // 2.6666667
-            .tolerance = 1e-3
-        },
-        "symmetric_square_100x100"
-    ),
+    std::make_tuple(TestIntegralData{.n_i = {100, 100},
+                                     .limits = {{-1.0, 1.0}, {-1.0, 1.0}},
+                                     .expected_value = 8.0 / 3.0,  // 2.6666667
+                                     .tolerance = 1e-3},
+                    "symmetric_square_100x100"),
 
     // Тест 5: Прямоугольник [0,2]x[0,1]
     // ∫∫(x²+y²)dxdy = (8*1 + 1*2)/3 = (8 + 2)/3 = 10/3 = 3.333333
-    std::make_tuple(
-        TestIntegralData{
-            .n_i = {200, 50},
-            .limits = {{0.0, 2.0}, {0.0, 1.0}},
-            .expected_value = 10.0/3.0,  // 3.333333
-            .tolerance = 1e-3
-        },
-        "nonuniform_grid_200x50"
-    ),
+    std::make_tuple(TestIntegralData{.n_i = {200, 50},
+                                     .limits = {{0.0, 2.0}, {0.0, 1.0}},
+                                     .expected_value = 10.0 / 3.0,  // 3.333333
+                                     .tolerance = 1e-3},
+                    "nonuniform_grid_200x50"),
 
     // Тест 6: Маленькая сетка
     std::make_tuple(
         TestIntegralData{
             .n_i = {10, 10},
             .limits = {{0.0, 1.0}, {0.0, 1.0}},
-            .expected_value = 2.0/3.0,
+            .expected_value = 2.0 / 3.0,
             .tolerance = 1e-1  // Очень большой допуск для маленькой сетки
         },
-        "small_grid_10x10"
-    ),
+        "small_grid_10x10"),
 
     // Тест 7: Минимальная сетка (1 интервал = 2 узла)
     // Метод трапеций для f(x,y)=x²+y² на [0,1]x[0,1] с 2x2 узлами:
@@ -268,39 +246,27 @@ const std::array<FuncTestType, 8> kTestParam = {
         TestIntegralData{
             .n_i = {1, 1},
             .limits = {{0.0, 1.0}, {0.0, 1.0}},
-            .expected_value = 2.0/3.0,
+            .expected_value = 2.0 / 3.0,
             .tolerance = 0.4  // Очень большой допуск
         },
-        "minimal_grid_1x1"
-    ),
+        "minimal_grid_1x1"),
 
     // Тест 8: Большая сетка для точного вычисления
     std::make_tuple(
         TestIntegralData{
-            .n_i = {500, 500},
-            .limits = {{0.0, 1.0}, {0.0, 1.0}},
-            .expected_value = 2.0/3.0,
-            .tolerance = 1e-5
-        },
-        "high_precision_500x500"
-    )
-};
+            .n_i = {500, 500}, .limits = {{0.0, 1.0}, {0.0, 1.0}}, .expected_value = 2.0 / 3.0, .tolerance = 1e-5},
+        "high_precision_500x500")};
 
 const auto kTestTasksList = std::tuple_cat(
-    ppc::util::AddFuncTask<BarkalovaMIntMetTrapezMPI, InType>(
-        kTestParam, PPC_SETTINGS_barkalova_m_int_met_trapez),
-    ppc::util::AddFuncTask<BarkalovaMIntMetTrapezSEQ, InType>(
-        kTestParam, PPC_SETTINGS_barkalova_m_int_met_trapez));
+    ppc::util::AddFuncTask<BarkalovaMIntMetTrapezMPI, InType>(kTestParam, PPC_SETTINGS_barkalova_m_int_met_trapez),
+    ppc::util::AddFuncTask<BarkalovaMIntMetTrapezSEQ, InType>(kTestParam, PPC_SETTINGS_barkalova_m_int_met_trapez));
 
 const auto kGtestValues = ppc::util::ExpandToValues(kTestTasksList);
 
-const auto kPerfTestName =
-    BarkalovaMIntMetTrapezRunFuncTests::PrintFuncTestName<BarkalovaMIntMetTrapezRunFuncTests>;
+const auto kPerfTestName = BarkalovaMIntMetTrapezRunFuncTests::PrintFuncTestName<BarkalovaMIntMetTrapezRunFuncTests>;
 
 INSTANTIATE_TEST_SUITE_P(IntegrationTests, BarkalovaMIntMetTrapezRunFuncTests, kGtestValues, kPerfTestName);
 
 }  // namespace
 
 }  // namespace barkalova_m_int_met_trapez
-
-*/
