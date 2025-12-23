@@ -29,11 +29,9 @@ class BarkalovaMStarPerfTest : public ppc::util::BaseRunPerfTests<InType, OutTyp
     auto test_tuple = GetParam();
     std::string task_type = std::get<1>(test_tuple);
 
-    if (task_type.find("seq") != std::string::npos) {
-      if (world_size_ > 1) {
-        skip_test_ = true;
-        return;
-      }
+    if (task_type.find("seq") != std::string::npos && world_size_ > 1) {
+      skip_test_ = true;
+      return;
     }
 
     skip_test_ = false;
@@ -43,6 +41,7 @@ class BarkalovaMStarPerfTest : public ppc::util::BaseRunPerfTests<InType, OutTyp
       input_data_.data[static_cast<std::size_t>(i)] = i % 100;
     }
 
+    // Упрощенная логика без повторяющихся веток
     if (world_size_ >= 4) {
       input_data_.source = 1;
       input_data_.dest = 3;
@@ -52,9 +51,6 @@ class BarkalovaMStarPerfTest : public ppc::util::BaseRunPerfTests<InType, OutTyp
     } else if (world_size_ == 2) {
       input_data_.source = 0;
       input_data_.dest = 1;
-    } else if (world_size_ == 1) {
-      input_data_.source = 0;
-      input_data_.dest = 0;
     } else {
       input_data_.source = 0;
       input_data_.dest = 0;
@@ -77,31 +73,16 @@ class BarkalovaMStarPerfTest : public ppc::util::BaseRunPerfTests<InType, OutTyp
       return output_data == input_data_.data;
     }
 
+    // Упрощенная логика без лишних else
     if (input_data_.source == input_data_.dest) {
-      if (output_data.size() != input_data_.data.size()) {
-        return false;
-      }
-      for (size_t i = 0; i < output_data.size(); ++i) {
-        if (output_data[i] != input_data_.data[i]) {
-          return false;
-        }
-      }
-      return true;
-    } else {
-      if (world_rank_ == input_data_.dest) {
-        if (output_data.size() != input_data_.data.size()) {
-          return false;
-        }
-        for (size_t i = 0; i < output_data.size(); ++i) {
-          if (output_data[i] != input_data_.data[i]) {
-            return false;
-          }
-        }
-        return true;
-      } else {
-        return output_data.empty();
-      }
+      return output_data == input_data_.data;
     }
+
+    if (world_rank_ == input_data_.dest) {
+      return output_data == input_data_.data;
+    }
+
+    return output_data.empty();
   }
 
   InType GetTestInputData() final {

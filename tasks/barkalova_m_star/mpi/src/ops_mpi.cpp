@@ -101,10 +101,10 @@ bool BarkalovaMStarMPI::RunImpl() {
   if (size == 1) {
     GetOutput() = GetInput().data;
     return true;
-  } else {
-    const std::vector<int> &data = input.data;
-    size_t data_size = data.size();
-
+  }
+  const std::vector<int> &data = input.data;
+  size_t data_size = data.size();
+  /*
     if (rank == source && source == dest) {
       GetOutput().resize(data_size);
     } else if (rank == dest || (rank == 0 && dest == 0)) {
@@ -112,13 +112,30 @@ bool BarkalovaMStarMPI::RunImpl() {
     } else {
       GetOutput() = {};
     }
+  */
 
-    if (source == dest) {
-      ToMyself(rank, source, input.data, GetOutput());
+  if (source == dest) {
+    if (rank == source) {
+      GetOutput() = input.data;
     } else {
-      ToAnother(rank, source, dest, data_size, input.data, GetOutput());
+      GetOutput() = {};
     }
+    return true;
   }
+
+  // Инициализация вывода для нужных процессов
+  if (rank == dest || (rank == 0 && dest == 0)) {
+    GetOutput().resize(data_size);
+  } else {
+    GetOutput() = {};
+  }
+
+  if (source == dest) {
+    ToMyself(rank, source, input.data, GetOutput());
+  } else {
+    ToAnother(rank, source, dest, data_size, input.data, GetOutput());
+  }
+
   return true;
 }
 

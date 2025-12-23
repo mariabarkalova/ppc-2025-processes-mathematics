@@ -12,20 +12,20 @@ namespace barkalova_m_star {
 class BarkalovaMStarFuncTest : public ::testing::Test {
  protected:
   static void SetUpTestSuite() {
-    int is_mpi_initialized;
+    int is_mpi_initialized = 0;  // Инициализация
     MPI_Initialized(&is_mpi_initialized);
-    if (!is_mpi_initialized) {
+    if (is_mpi_initialized == 0) {  // Явное сравнение
       MPI_Init(nullptr, nullptr);
     }
   }
 
   static void TearDownTestSuite() {
-    int is_mpi_initialized;
+    int is_mpi_initialized = 0;  // Инициализация
     MPI_Initialized(&is_mpi_initialized);
-    if (is_mpi_initialized) {
-      int is_mpi_finalized;
+    if (is_mpi_initialized != 0) {  // Явное сравнение
+      int is_mpi_finalized = 0;     // Инициализация
       MPI_Finalized(&is_mpi_finalized);
-      if (!is_mpi_finalized) {
+      if (is_mpi_finalized == 0) {  // Явное сравнение
         MPI_Finalize();
       }
     }
@@ -210,7 +210,9 @@ TEST_F(BarkalovaMStarFuncTest, SequentialVersion) {
   input.source = 0;
   input.dest = 0;
 
+  // Предварительное выделение памяти
   std::vector<int> test_data;
+  test_data.reserve(100);  // Резервируем память
   for (int i = 0; i < 100; ++i) {
     test_data.push_back(i * i);
   }
