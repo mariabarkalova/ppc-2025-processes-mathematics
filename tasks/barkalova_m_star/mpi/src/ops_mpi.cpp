@@ -123,7 +123,6 @@ bool BarkalovaMStarMPI::RunImpl() {
     return true;
   }
 
-  // Инициализация вывода для нужных процессов
   if (rank == dest || (rank == 0 && dest == 0)) {
     GetOutput().resize(data_size);
   } else {
