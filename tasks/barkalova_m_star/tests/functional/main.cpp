@@ -180,7 +180,6 @@ TEST_F(BarkalovaMStarFuncTest, ValidationTests) {
   BarkalovaMStarMPI valid_task(valid_input);
   EXPECT_TRUE(valid_task.Validation());
 
-  // Некорректный source
   StarMessage invalid_source;
   invalid_source.source = -1;
   invalid_source.dest = 0;
@@ -189,7 +188,6 @@ TEST_F(BarkalovaMStarFuncTest, ValidationTests) {
   BarkalovaMStarMPI invalid_source_task(invalid_source);
   EXPECT_FALSE(invalid_source_task.Validation());
 
-  // Некорректный dest
   StarMessage invalid_dest;
   invalid_dest.source = 0;
   invalid_dest.dest = size + 100;
