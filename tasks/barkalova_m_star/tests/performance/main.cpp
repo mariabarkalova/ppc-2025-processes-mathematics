@@ -14,7 +14,7 @@
 namespace barkalova_m_star {
 
 class BarkalovaMStarPerfTest : public ppc::util::BaseRunPerfTests<InType, OutType> {
-  static constexpr int kDataSize = 1000000;
+  static constexpr int kDataSize = 1000000000;
 
   InType input_data_{};
   std::vector<int> expected_output_;
