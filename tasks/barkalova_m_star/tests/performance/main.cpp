@@ -41,7 +41,6 @@ class BarkalovaMStarPerfTest : public ppc::util::BaseRunPerfTests<InType, OutTyp
       input_data_.data[static_cast<std::size_t>(i)] = i % 100;
     }
 
-    // Упрощенная логика без повторяющихся веток
     if (world_size_ >= 4) {
       input_data_.source = 1;
       input_data_.dest = 3;
@@ -73,7 +72,6 @@ class BarkalovaMStarPerfTest : public ppc::util::BaseRunPerfTests<InType, OutTyp
       return output_data == input_data_.data;
     }
 
-    // Упрощенная логика без лишних else
     if (input_data_.source == input_data_.dest) {
       return output_data == input_data_.data;
     }

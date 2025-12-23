@@ -13,7 +13,6 @@ struct StarMessage {
 };
 
 using InType = StarMessage;
-// using InType = std::tuple<int, int, std::vector<int>>;
 using OutType = std::vector<int>;
 using TestType = std::tuple<StarMessage, std::vector<int>>;
 using BaseTask = ppc::task::Task<InType, OutType>;

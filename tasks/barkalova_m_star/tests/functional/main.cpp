@@ -12,20 +12,20 @@ namespace barkalova_m_star {
 class BarkalovaMStarFuncTest : public ::testing::Test {
  protected:
   static void SetUpTestSuite() {
-    int is_mpi_initialized = 0;  // Инициализация
+    int is_mpi_initialized = 0;
     MPI_Initialized(&is_mpi_initialized);
-    if (is_mpi_initialized == 0) {  // Явное сравнение
+    if (is_mpi_initialized == 0) {
       MPI_Init(nullptr, nullptr);
     }
   }
 
   static void TearDownTestSuite() {
-    int is_mpi_initialized = 0;  // Инициализация
+    int is_mpi_initialized = 0;
     MPI_Initialized(&is_mpi_initialized);
-    if (is_mpi_initialized != 0) {  // Явное сравнение
-      int is_mpi_finalized = 0;     // Инициализация
+    if (is_mpi_initialized != 0) {
+      int is_mpi_finalized = 0;
       MPI_Finalized(&is_mpi_finalized);
-      if (is_mpi_finalized == 0) {  // Явное сравнение
+      if (is_mpi_finalized == 0) {
         MPI_Finalize();
       }
     }

@@ -2,8 +2,8 @@
 
 #include <mpi.h>
 
-#include <cstddef>  // для size_t
-#include <utility>  // для std::move
+#include <cstddef>
+#include <utility>
 #include <vector>
 
 #include "barkalova_m_star/common/include/common.hpp"
@@ -104,15 +104,6 @@ bool BarkalovaMStarMPI::RunImpl() {
   }
   const std::vector<int> &data = input.data;
   size_t data_size = data.size();
-
-  if (source == dest) {
-    if (rank == source) {
-      GetOutput() = input.data;
-    } else {
-      GetOutput() = {};
-    }
-    return true;
-  }
 
   if (rank == dest || (rank == 0 && dest == 0)) {
     GetOutput().resize(data_size);
