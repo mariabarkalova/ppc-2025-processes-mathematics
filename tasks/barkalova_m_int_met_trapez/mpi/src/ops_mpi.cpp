@@ -77,13 +77,23 @@ bool BarkalovaMIntMetTrapezMPI::RunImpl() {
 
   BroadcastData bcast_data;
   if (rank == 0) {
-    // Извлекаем данные из структуры Integral
-    bcast_data.n_steps_x = data_local.n_i[0];
-    bcast_data.n_steps_y = data_local.n_i[1];
-    bcast_data.x1 = data_local.limits[0].first;
-    bcast_data.x2 = data_local.limits[0].second;
-    bcast_data.y1 = data_local.limits[1].first;
-    bcast_data.y2 = data_local.limits[1].second;
+    //  ПРОВЕРКА перед доступом к элементам вектора
+    if (data_local.n_i.size() >= 2 && data_local.limits.size() >= 2) {
+      bcast_data.n_steps_x = data_local.n_i[0];
+      bcast_data.n_steps_y = data_local.n_i[1];
+      bcast_data.x1 = data_local.limits[0].first;
+      bcast_data.x2 = data_local.limits[0].second;
+      bcast_data.y1 = data_local.limits[1].first;
+      bcast_data.y2 = data_local.limits[1].second;
+    } else {
+      // Значения по умолчанию в случае ошибки
+      bcast_data.n_steps_x = 1;
+      bcast_data.n_steps_y = 1;
+      bcast_data.x1 = 0.0;
+      bcast_data.x2 = 1.0;
+      bcast_data.y1 = 0.0;
+      bcast_data.y2 = 1.0;
+    }
   }
 
   MPI_Bcast(&bcast_data.n_steps_x, 1, MPI_INT, 0, MPI_COMM_WORLD);

@@ -26,6 +26,13 @@ bool BarkalovaMIntMetTrapezSEQ::PreProcessingImpl() {
 
 bool BarkalovaMIntMetTrapezSEQ::RunImpl() {
   auto data = GetInput();
+
+  //  ПРОВЕРКА перед доступом к элементам вектора!
+  if (data.limits.size() < 2 || data.n_i.size() < 2) {
+    GetOutput() = 0.0;
+    return true;
+  }
+
   double x1 = data.limits[0].first;
   double x2 = data.limits[0].second;
   double y1 = data.limits[1].first;
