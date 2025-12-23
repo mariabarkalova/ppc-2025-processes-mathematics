@@ -210,9 +210,8 @@ TEST_F(BarkalovaMStarFuncTest, SequentialVersion) {
   input.source = 0;
   input.dest = 0;
 
-  // Предварительное выделение памяти
   std::vector<int> test_data;
-  test_data.reserve(100);  // Резервируем память
+  test_data.reserve(100);
   for (int i = 0; i < 100; ++i) {
     test_data.push_back(i * i);
   }
