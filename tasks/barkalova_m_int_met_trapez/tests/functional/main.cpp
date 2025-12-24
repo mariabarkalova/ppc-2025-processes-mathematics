@@ -347,22 +347,10 @@ class BarkalovaMIntMetTrapezRunFuncTests : public ppc::util::BaseRunFuncTests<In
 
 namespace {
 
-// ПРАВИЛЬНАЯ аналитическая формула для f(x,y) = x² + y²
-double CalculateExactIntegral(double x1, double x2, double y1, double y2) {
-  double x_diff = x2 - x1;
-  double y_diff = y2 - y1;
-
-  double x_cubed_diff = (x2 * x2 * x2 - x1 * x1 * x1);
-  double y_cubed_diff = (y2 * y2 * y2 - y1 * y1 * y1);
-
-  return (x_cubed_diff * y_diff + y_cubed_diff * x_diff) / 3.0;
-}
-
 TEST_P(BarkalovaMIntMetTrapezRunFuncTests, IntegrationTest) {
   ExecuteTest(GetParam());
 }
 
-// ПРАВИЛЬНЫЕ тестовые данные
 const std::array<FuncTestType, 8> kTestParam = {
     // Тест 1: Единичный квадрат [0,1]x[0,1]
     // ∫∫(x²+y²)dxdy = 2/3 = 0.6666667
