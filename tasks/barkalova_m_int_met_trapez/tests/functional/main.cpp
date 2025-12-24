@@ -353,58 +353,60 @@ TEST_P(BarkalovaMIntMetTrapezRunFuncTests, IntegrationTest) {
 
 const std::array<FuncTestType, 8> kTestParam = {
     // Тест 1: Единичный квадрат [0,1]x[0,1]
-    // ∫∫(x²+y²)dxdy = 2/3 = 0.6666667
-    std::make_tuple(
-        TestIntegralData{
-            .n_i = {100, 100}, .limits = {{0.0, 1.0}, {0.0, 1.0}}, .expected_value = 2.0 / 3.0, .tolerance = 1e-4},
-        "unit_square_100x100"),
+    std::make_tuple(TestIntegralData{.n_i = {100, 100},
+                                     .limits = {{0.0, 1.0}, {0.0, 1.0}},
+                                     .expected_value = 2.0 / 3.0,  // 0.666667
+                                     .tolerance = 1e-4},
+                    "unit_square_100x100"),
 
     // Тест 2: Тот же квадрат с меньшей сеткой
-    std::make_tuple(
-        TestIntegralData{
-            .n_i = {50, 50}, .limits = {{0.0, 1.0}, {0.0, 1.0}}, .expected_value = 2.0 / 3.0, .tolerance = 1e-3},
-        "unit_square_50x50"),
+    std::make_tuple(TestIntegralData{.n_i = {50, 50},
+                                     .limits = {{0.0, 1.0}, {0.0, 1.0}},
+                                     .expected_value = 2.0 / 3.0,  // 0.666667
+                                     .tolerance = 1e-3},
+                    "unit_square_50x50"),
 
     // Тест 3: Прямоугольник [0,2]x[0,3]
-    // ∫∫(x²+y²)dxdy = (8*3 + 27*2)/3 = (24 + 54)/3 = 78/3 = 26
-    std::make_tuple(
-        TestIntegralData{
-            .n_i = {100, 100}, .limits = {{0.0, 2.0}, {0.0, 3.0}}, .expected_value = 26.0, .tolerance = 1e-2},
-        "rectangle_2x3_100x100"),
+    std::make_tuple(TestIntegralData{.n_i = {100, 100},
+                                     .limits = {{0.0, 2.0}, {0.0, 3.0}},
+                                     .expected_value = 26.0,  // (8*3 + 27*2)/3 = 78/3 = 26
+                                     .tolerance = 1e-2},
+                    "rectangle_2x3_100x100"),
 
     // Тест 4: Симметричный квадрат [-1,1]x[-1,1]
-    // ∫∫(x²+y²)dxdy = 8/3 = 2.6666667
-    std::make_tuple(
-        TestIntegralData{
-            .n_i = {100, 100}, .limits = {{-1.0, 1.0}, {-1.0, 1.0}}, .expected_value = 8.0 / 3.0, .tolerance = 1e-3},
-        "symmetric_square_100x100"),
+    std::make_tuple(TestIntegralData{.n_i = {100, 100},
+                                     .limits = {{-1.0, 1.0}, {-1.0, 1.0}},
+                                     .expected_value = 8.0 / 3.0,  // 2.666667
+                                     .tolerance = 1e-3},
+                    "symmetric_square_100x100"),
 
     // Тест 5: Прямоугольник [0,2]x[0,1]
-    // ∫∫(x²+y²)dxdy = (8*1 + 1*2)/3 = (8 + 2)/3 = 10/3 = 3.333333
-    std::make_tuple(
-        TestIntegralData{
-            .n_i = {200, 50}, .limits = {{0.0, 2.0}, {0.0, 1.0}}, .expected_value = 10.0 / 3.0, .tolerance = 1e-3},
-        "nonuniform_grid_200x50"),
+    std::make_tuple(TestIntegralData{.n_i = {200, 50},
+                                     .limits = {{0.0, 2.0}, {0.0, 1.0}},
+                                     .expected_value = 10.0 / 3.0,  // 3.333333
+                                     .tolerance = 1e-3},
+                    "nonuniform_grid_200x50"),
 
     // Тест 6: Маленькая сетка [0,1]x[0,1]
     std::make_tuple(TestIntegralData{.n_i = {10, 10},
                                      .limits = {{0.0, 1.0}, {0.0, 1.0}},
-                                     .expected_value = 2.0 / 3.0,
-                                     .tolerance = 0.1},  // Большой допуск для маленькой сетки
+                                     .expected_value = 2.0 / 3.0,  // 0.666667
+                                     .tolerance = 0.1},
                     "small_grid_10x10"),
 
     // Тест 7: Минимальная сетка [0,1]x[0,1]
     std::make_tuple(TestIntegralData{.n_i = {1, 1},
                                      .limits = {{0.0, 1.0}, {0.0, 1.0}},
-                                     .expected_value = 2.0 / 3.0,
-                                     .tolerance = 0.4},  // Очень большой допуск
+                                     .expected_value = 2.0 / 3.0,  // 0.666667
+                                     .tolerance = 0.4},
                     "minimal_grid_1x1"),
 
     // Тест 8: Большая сетка для точности [0,1]x[0,1]
-    std::make_tuple(
-        TestIntegralData{
-            .n_i = {500, 500}, .limits = {{0.0, 1.0}, {0.0, 1.0}}, .expected_value = 2.0 / 3.0, .tolerance = 1e-5},
-        "high_precision_500x500")};
+    std::make_tuple(TestIntegralData{.n_i = {500, 500},
+                                     .limits = {{0.0, 1.0}, {0.0, 1.0}},
+                                     .expected_value = 2.0 / 3.0,  // 0.666667
+                                     .tolerance = 1e-5},
+                    "high_precision_500x500")};
 
 const auto kTestTasksList = std::tuple_cat(
     ppc::util::AddFuncTask<BarkalovaMIntMetTrapezMPI, InType>(kTestParam, PPC_SETTINGS_barkalova_m_int_met_trapez),
