@@ -3,11 +3,11 @@
 #include <mpi.h>
 
 #include <algorithm>
-#include <numeric>
+// #include <numeric>
 #include <vector>
 
 #include "barkalova_m_int_met_trapez/common/include/common.hpp"
-#include "util/include/util.hpp"
+// #include "util/include/util.hpp"
 
 namespace barkalova_m_int_met_trapez {
 
@@ -122,12 +122,12 @@ bool BarkalovaMIntMetTrapezMPI::RunImpl() {
 namespace {
 // Структура для передачи данных между процессами
 struct BroadcastData {
-  int n_steps_x;
-  int n_steps_y;
-  double x1, x2, y1, y2;
+  int n_steps_x{0};
+  int n_steps_y{0};
+  double x1{0.0}, x2{0.0}, y1{0.0}, y2{0.0};
 
   // Конструктор для инициализации
-  BroadcastData() : n_steps_x(0), n_steps_y(0), x1(0.0), x2(0.0), y1(0.0), y2(0.0) {}
+  BroadcastData() = default;
 };
 
 template <typename Func>

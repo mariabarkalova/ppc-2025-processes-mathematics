@@ -45,8 +45,8 @@ INSTANTIATE_TEST_SUITE_P(RunModeTests, ExampleRunPerfTestProcesses3, kGtestValue
 #include <mpi.h>
 
 #include <cmath>
+// #include <vector>
 #include <iostream>
-#include <vector>
 
 #include "barkalova_m_int_met_trapez/common/include/common.hpp"
 #include "barkalova_m_int_met_trapez/mpi/include/ops_mpi.hpp"
@@ -58,11 +58,9 @@ namespace barkalova_m_int_met_trapez {
 class BarkalovaIntegralPerformanceTests : public ppc::util::BaseRunPerfTests<InType, OutType> {
  protected:
   void SetUp() override {
-    // Уменьшаем размер сетки для тестов производительности
-    // 500x500 = 250K узлов вместо 4M (быстрее в 16 раз)
     input_data_ = Integral{
         .limits = {{0.0, 1.0}, {0.0, 1.0}},  // Единичный квадрат
-        .n_i = {500, 500}                    // Уменьшенная сетка для теста производительности
+        .n_i = {500, 500}                    //  сетка для теста
     };
   }
 
@@ -70,14 +68,12 @@ class BarkalovaIntegralPerformanceTests : public ppc::util::BaseRunPerfTests<InT
     int rank = 0;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-    // Проверяем только на процессе 0, чтобы избежать дублирования сообщений
     if (rank != 0) {
       return true;
     }
 
-    // Ожидаемое значение для f(x,y) = x² + y² на [0,1]x[0,1]
-    double expected = 2.0 / 3.0;  // ≈ 0.6666667
-    double tolerance = 1e-4;      // Допуск для сетки 500x500
+    double expected = 2.0 / 3.0;
+    double tolerance = 1e-4;
 
     double error = std::abs(output_data - expected);
     bool result = error < tolerance;
@@ -102,7 +98,6 @@ TEST_P(BarkalovaIntegralPerformanceTests, PerformanceTests) {
   ExecuteTest(GetParam());
 }
 
-// Создаем задачи для тестирования производительности
 const auto kAllPerfTasks = ppc::util::MakeAllPerfTasks<InType, BarkalovaMIntMetTrapezMPI, BarkalovaMIntMetTrapezSEQ>(
     PPC_SETTINGS_barkalova_m_int_met_trapez);
 
