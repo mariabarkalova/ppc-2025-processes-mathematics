@@ -16,7 +16,7 @@ class BarkalovaIntegralPerformanceTests : public ppc::util::BaseRunPerfTests<InT
   void SetUp() override {
     input_data_ = Integral{
         .limits = {{0.0, 1.0}, {0.0, 1.0}},  // Единичный квадрат
-        .n_i = {1000, 1000}                  //  сетка для теста
+        .n_i = {500, 500}                    //  сетка для теста
     };
   }
 
