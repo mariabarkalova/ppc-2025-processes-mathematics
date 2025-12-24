@@ -36,7 +36,7 @@ struct BroadcastData {
 };
 
 template <typename Func>
-double RunKernel(const BroadcastData &data, int rank, int size, const Func &f) {
+double Calculation(const BroadcastData &data, int rank, int size, const Func &f) {
   double hx = (data.x2 - data.x1) / data.n_steps_x;
   double hy = (data.y2 - data.y1) / data.n_steps_y;
 
@@ -102,7 +102,7 @@ bool BarkalovaMIntMetTrapezMPI::RunImpl() {
   double local_result = 0.0;
 
   if (bcast_data.n_steps_x > 0 && bcast_data.n_steps_y > 0) {
-    local_result = RunKernel(bcast_data, rank, size, [](double x, double y) { return (x * x) + (y * y); });
+    local_result = Calculation(bcast_data, rank, size, [](double x, double y) { return (x * x) + (y * y); });
   }
 
   double global_result = 0.0;
