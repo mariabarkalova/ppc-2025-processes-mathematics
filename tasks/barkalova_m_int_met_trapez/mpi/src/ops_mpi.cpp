@@ -131,14 +131,22 @@ double RunKernel(const BroadcastData &data, int rank, int size, const Func &f) {
   double hx = (data.x2 - data.x1) / data.n_steps_x;
   double hy = (data.y2 - data.y1) / data.n_steps_y;
 
-  // Распределяем узлы
-  // int total_nodes = data.n_steps_x + 1;
+  // Распределяем УЗЛЫ по x (узлов = n_steps_x + 1)
+  int total_nodes_x = data.n_steps_x + 1;
 
-  // каждый процесс обрабатывает каждый size-ый узел
-  //  Это гарантирует, что все узлы будут обработаны ровно один раз
+  // Базовое количество узлов на процесс
+  int count = total_nodes_x / size;
+  // Остаток распределяем по первым процессам
+  int remainder = total_nodes_x % size;
+
+  // Определяем диапазон узлов для текущего процесса
+  int start_i = (rank * count) + std::min(rank, remainder);
+  int end_i = start_i + count + (rank < remainder ? 1 : 0);
+
   double local_sum = 0.0;
 
-  for (int i = rank; i <= data.n_steps_x; i += size) {
+  // Каждый процесс обрабатывает свой диапазон узлов
+  for (int i = start_i; i < end_i; ++i) {
     double x = data.x1 + (i * hx);
     double weight_x = (i == 0 || i == data.n_steps_x) ? 0.5 : 1.0;
 
