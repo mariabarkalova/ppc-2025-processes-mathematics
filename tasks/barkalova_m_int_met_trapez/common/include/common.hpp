@@ -10,7 +10,7 @@
 namespace barkalova_m_int_met_trapez {
 
 struct Integral {
-  static double Function(double x, double y)  // подинтегральная функция
+  static double Function(double x, double y)  // подынтегральная ф
   {
     return (x * x) + (y * y);
   }
