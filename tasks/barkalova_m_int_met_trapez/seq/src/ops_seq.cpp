@@ -23,7 +23,7 @@ bool BarkalovaMIntMetTrapezSEQ::PreProcessingImpl() {
   GetOutput() = 0.0;
   return true;
 }
-
+/*
 bool BarkalovaMIntMetTrapezSEQ::RunImpl() {
   auto data = GetInput();
 
@@ -56,6 +56,44 @@ bool BarkalovaMIntMetTrapezSEQ::RunImpl() {
 
       // Создаем вектор с координатами для передачи в функцию
       // std::vector<double> point = {x, y};
+      sum += data.function(x, y) * weight_x * weight_y;
+    }
+  }
+
+  GetOutput() = sum * hx * hy;
+
+  return true;
+}*/
+
+bool BarkalovaMIntMetTrapezSEQ::RunImpl() {
+  auto data = GetInput();
+
+  if (data.n_i.size() < 2 || data.limits.size() < 2) {
+    GetOutput() = 0.0;
+    return true;
+  }
+
+  double x1 = data.limits[0].first;
+  double x2 = data.limits[0].second;
+  double y1 = data.limits[1].first;
+  double y2 = data.limits[1].second;
+
+  int n_steps_x = data.n_i[0];
+  int n_steps_y = data.n_i[1];
+
+  double hx = (x2 - x1) / n_steps_x;
+  double hy = (y2 - y1) / n_steps_y;
+
+  double sum = 0.0;
+
+  for (int i = 0; i <= n_steps_x; ++i) {
+    double x = x1 + (i * hx);
+    double weight_x = (i == 0 || i == n_steps_x) ? 0.5 : 1.0;
+
+    for (int j = 0; j <= n_steps_y; ++j) {
+      double y = y1 + (j * hy);
+      double weight_y = (j == 0 || j == n_steps_y) ? 0.5 : 1.0;
+
       sum += data.function(x, y) * weight_x * weight_y;
     }
   }
