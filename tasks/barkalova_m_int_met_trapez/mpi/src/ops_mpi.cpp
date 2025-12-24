@@ -2,6 +2,7 @@
 
 #include <mpi.h>
 
+#include <algorithm>
 #include <numeric>
 #include <vector>
 
@@ -124,6 +125,9 @@ struct BroadcastData {
   int n_steps_x;
   int n_steps_y;
   double x1, x2, y1, y2;
+
+  // Конструктор для инициализации
+  BroadcastData() : n_steps_x(0), n_steps_y(0), x1(0.0), x2(0.0), y1(0.0), y2(0.0) {}
 };
 
 template <typename Func>
@@ -168,7 +172,7 @@ bool BarkalovaMIntMetTrapezMPI::RunImpl() {
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   MPI_Comm_size(MPI_COMM_WORLD, &size);
 
-  BroadcastData bcast_data;
+  BroadcastData bcast_data{};
 
   if (rank == 0) {
     Integral data_local = GetInput();
@@ -200,7 +204,7 @@ bool BarkalovaMIntMetTrapezMPI::RunImpl() {
   double local_result = 0.0;
 
   if (bcast_data.n_steps_x > 0 && bcast_data.n_steps_y > 0) {
-    local_result = RunKernel(bcast_data, rank, size, [](double x, double y) { return x * x + y * y; });
+    local_result = RunKernel(bcast_data, rank, size, [](double x, double y) { return (x * x) + (y * y); });
   }
 
   double global_result = 0.0;

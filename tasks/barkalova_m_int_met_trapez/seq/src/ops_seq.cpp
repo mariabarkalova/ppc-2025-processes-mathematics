@@ -1,5 +1,6 @@
 #include "barkalova_m_int_met_trapez/seq/include/ops_seq.hpp"
 
+#include <algorithm>
 #include <numeric>
 #include <vector>
 
@@ -94,7 +95,8 @@ bool BarkalovaMIntMetTrapezSEQ::RunImpl() {
       double y = y1 + (j * hy);
       double weight_y = (j == 0 || j == n_steps_y) ? 0.5 : 1.0;
 
-      sum += data.function(x, y) * weight_x * weight_y;
+      // sum += data.function(x, y) * weight_x * weight_y;
+      sum += data.Function(x, y) * weight_x * weight_y;
     }
   }
 

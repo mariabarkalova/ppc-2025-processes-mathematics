@@ -2,15 +2,17 @@
 
 #include <string>
 #include <tuple>
+#include <utility>
+#include <vector>
 
 #include "task/include/task.hpp"
 
 namespace barkalova_m_int_met_trapez {
 
 struct Integral {
-  double function(double x, double y)  // подинтегральная функция
+  static double Function(double x, double y)  // подинтегральная функция
   {
-    return x * x + y * y;
+    return (x * x) + (y * y);
   }
 
   std::vector<std::pair<double, double>> limits;  // пределы интегрирования

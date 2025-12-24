@@ -278,8 +278,11 @@ INSTANTIATE_TEST_SUITE_P(IntegrationTests, BarkalovaMIntMetTrapezRunFuncTests, k
 #include <array>
 #include <cmath>
 #include <cstddef>
+#include <iostream>
 #include <string>
 #include <tuple>
+#include <utility>
+#include <vector>
 
 #include "barkalova_m_int_met_trapez/common/include/common.hpp"
 #include "barkalova_m_int_met_trapez/mpi/include/ops_mpi.hpp"
@@ -328,9 +331,8 @@ class BarkalovaMIntMetTrapezRunFuncTests : public ppc::util::BaseRunFuncTests<In
     // Для отладки выводим информацию при ошибке
     if (absolute_error >= tolerance_) {
       std::cout << "TEST FAILED: absolute error = " << absolute_error << ", tolerance = " << tolerance_
-                << ", expected = " << expected_value_ << ", got = " << output_data << std::endl;
+                << ", expected = " << expected_value_ << ", got = " << output_data << '\n';
     }
-
     return absolute_error < tolerance_;
   }
 

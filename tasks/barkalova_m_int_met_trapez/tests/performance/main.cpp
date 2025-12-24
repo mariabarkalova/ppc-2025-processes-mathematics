@@ -45,6 +45,7 @@ INSTANTIATE_TEST_SUITE_P(RunModeTests, ExampleRunPerfTestProcesses3, kGtestValue
 #include <mpi.h>
 
 #include <cmath>
+#include <iostream>
 #include <vector>
 
 #include "barkalova_m_int_met_trapez/common/include/common.hpp"
@@ -83,7 +84,7 @@ class BarkalovaIntegralPerformanceTests : public ppc::util::BaseRunPerfTests<InT
 
     if (!result) {
       std::cout << "Performance test check failed: expected " << expected << ", got " << output_data << ", error "
-                << error << ", tolerance " << tolerance << std::endl;
+                << error << ", tolerance " << tolerance << '\n';
     }
 
     return result;
